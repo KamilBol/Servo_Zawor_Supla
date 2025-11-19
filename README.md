@@ -1,7 +1,7 @@
 # Servo_Zawor_Supla
 ### Sterowanie zaworem czterodrożnym C.O. przez Supla – Kamil Ból 2025
 
-Zawór czterodrożny (obrotowy) w instalacji C.O. sterowany serwem DS3225-270° przez ESP-01S.  
+Zawór czterodrożny w instalacji C.O. sterowany serwem DS3225-270° przez ESP-01S.  
 Całość działa z aplikacją Supla jako kanał „brama wjazdowa” – klikam „otwórz/zamknij” → zawór się obraca.  
 Dwa kontaktrony podpięte do Wemos D1 Mini dają 100% pewność stanu w aplikacji.  
 Po zaniku zasilania zawsze wraca do pozycji ZAMKNIĘTEJ (obieg grzejniki).

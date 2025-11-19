@@ -10,12 +10,12 @@ Po zaniku zasilania zawsze wraca do pozycji ZAMKNIĘTEJ (obieg grzejniki).
 - Pierwszy impuls → zawór otwiera (np. na obieg bojlera)
 - Drugi impuls → zawór zamyka (powrót na grzejniki)
 - Kontaktron potwierdza mechanicznie pozycję zamkniętą
-- ESP-01S wystawia na TX: HIGH = zamknięty, LOW = otwarty
-- Po restarcie ESP zawsze ustawia serwo na pozycję startową
+- Kontaktron wystawia na TX: HIGH = zamknięty, LOW = otwarty
+- Po restarcie ESP01s nie zmienia ustawienia zaworu ale wie jak jest ustawiony. 
 - Kalibracja pozycji i kąta w dwóch linijkach kodu
-- Zero przekaźników, cicha praca, wodoodporne serwo
+- Zero przekaźników, cicha praca, 
 
-**Zastosowanie:** przełączanie obiegu C.O. grzejniki / bojler, mieszanie obiegów, automatyka C.O.
+**Zastosowanie:** przełączanie obiegu C.O. grzejniki podłogówka / bojler, mieszanie obiegów, automatyka C.O.
 
 Autor: Kamil Ból  
 Licencja: MIT – róbta co chceta

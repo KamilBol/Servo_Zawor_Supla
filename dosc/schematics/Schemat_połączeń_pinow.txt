@@ -19,7 +19,7 @@ Autor: Kamil Ból – Servo_Zawor_Supla 2025
 │       kontaktron     │          │                 │          │                 │
 │       OTWARTY        │          │                 │          │                 │
 │                      │          │                 │          │                 │
-│                      │          │ GPIO2 ────────────────────────>│ Sygnał (pomarańcz/żółty) │
+│                      │          │ GPIO2 ────────────────────>│ Sygnał (pomarańcz/żółty) │
 │                      │          │                 │          │                 │
 │                      │          │ GPIO1 (TX) ──────> (opcjonalnie do innego układu) │
 │                      │          │      HIGH = zamknięty                     │

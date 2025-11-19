@@ -1,0 +1,45 @@
+ZAWÓR CZTERODROŻNY C.O. – SCHEMAT PODŁĄCZEŃ
+Autor: Kamil Ból – Servo_Zawor_Supla 2025
+
+┌──────────────────────┐          ┌─────────────────┐          ┌─────────────────┐
+│   WEMOS D1 MINI      │          │   ESP-01S       │          │  SERWO DS3225   │
+│ (Supla Cloud)        │          │                 │          │ 270° 30kg       │
+├──────────────────────┤          ├─────────────────┤          ├─────────────────┤
+│ 3V3 ────────────────>│─────────>│ VCC             │          │                 │
+│ GND ────────────────>│─────────>│ GND ─────────────────────>│ GND (czarny)    │
+│                      │          │                 │          │                 │
+│ D5 (GPIO14) ────────>│─────────>│ GPIO0 (impuls + │          │                 │
+│                      │          │      kontaktron)│          │                 │
+│                      │          │                 │          │                 │
+│ D1 (GPIO5)  <─────── │          │                 │          │                 │
+│       kontaktron     │          │                 │          │                 │
+│       ZAMKNIĘTY      │          │                 │          │                 │
+│                      │          │                 │          │                 │
+│ D2 (GPIO4)  <─────── │          │                 │          │                 │
+│       kontaktron     │          │                 │          │                 │
+│       OTWARTY        │          │                 │          │                 │
+│                      │          │                 │          │                 │
+│                      │          │ GPIO2 ────────────────────────>│ Sygnał (pomarańcz/żółty) │
+│                      │          │                 │          │                 │
+│                      │          │ GPIO1 (TX) ──────> (opcjonalnie do innego układu) │
+│                      │          │      HIGH = zamknięty                     │
+│                      │          │      LOW  = otwarty                       │
+└──────────────────────┘          └─────────────────┘          └─────────────────┘
+
+ZASILANIE SERWA (OBOWIĄZKOWO OSOBNE!)
+┌─────────────────────────────────────┐
+│ Zasilacz 6V / 3–5A (np. laptopowy)  │
+│ + ───────────────────────> + serwa (czerwony)   │
+│ - ───────────────────────> GND (wszystko razem) │
+└─────────────────────────────────────┘
+
+KONTAKTRONY – podłączone do Wemos D1 Mini
+Kontaktron ZAMKNIĘTY: jeden koniec → GND, drugi → D1 + rezystor pull-up 10k do 3.3V
+Kontaktron OTWARTY:   jeden koniec → GND, drugi → D2 + rezystor pull-up 10k do 3.3V
+
+WAŻNE:
+- Wspólna masa: GND serwa + GND ESP-01S + GND Wemos = wszystko razem!
+- Serwo nigdy nie zasilane z 3.3V/5V z płytek – spali się albo nie pojedzie!
+- Jak nie masz osobnego zasilacza 6V – możesz użyć stabilnego 5V/5A (też działa)
+
+Gotowe – podłączasz dokładnie tak i działa od pierwszego razu.

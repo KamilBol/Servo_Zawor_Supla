@@ -1,0 +1,62 @@
+=========================================================================
+INSTRUKCJA SERWISOWA I KONFIGURACYJNA - STEROWNIK ZAWORU "SERVO MASTER"
+Autor: Kamil Ból ("Bólu")
+Wersja: 3.0 (Platinum Edition)
+=========================================================================
+
+SIEMA. Tu Bólu.
+To jest instrukcja jak sterować ukrytymi funkcjami serwisowymi bez podłączania 
+komputera. Wszystko ustawisz zworkami/kabelkami na płytce.
+
+-------------------------------------------------------------------------
+1. PINOUT (CO GDZIE WTYKASZ)
+-------------------------------------------------------------------------
+[D1] -> SERWO (Sygnał PWM)
+[D2] -> TRIGGER (Sterowanie). Impuls 3.3V = Ruch.
+[D5] -> KONTAKTRON. 3.3V = Zamknięty (chyba że odwrócisz logikę).
+
+[D6] -> ZMNIEJSZ KĄT OTWARCIA (Korekta -)
+[D7] -> ZWIĘKSZ KĄT OTWARCIA (Korekta +)
+[D0] -> ODWRACANIE LOGIKI (Zmiana działania czujnika)
+
+-------------------------------------------------------------------------
+2. KALIBRACJA KĄTA (JAK ZAWÓR NIE DOMYKA)
+-------------------------------------------------------------------------
+-> ABY ZMNIEJSZYĆ KĄT:
+   Dotknij kablem 3.3V do pinu [D6]. 
+   LED mrugnie 1 raz. Kąt zmniejsza się o ok. 5 stopni.
+
+-> ABY ZWIĘKSZYĆ KĄT:
+   Dotknij kablem 3.3V do pinu [D7].
+   LED mrugnie 2 razy. Kąt zwiększa się o ok. 5 stopni.
+
+Ustawienia są zapamiętywane na zawsze (w EEPROM).
+
+-------------------------------------------------------------------------
+3. ZMIANA LOGIKI CZUJNIKA (BEZ LUTOWANIA)
+-------------------------------------------------------------------------
+Jeśli kontaktron działa na odwrót (pokazuje otwarte jak jest zamknięte):
+
+-> CO ZROBIĆ:
+   Zewrzyj pin [D0] do 3.3V i TRZYMAJ przez 5 SEKUND.
+   
+-> EFEKT:
+   Dioda LED zrobi dyskotekę (5 szybkich błysków).
+   
+-> WYNIK:
+   Wemos odwraca interpretację pinu D5. 
+   (HI staje się LO, LO staje się HI).
+
+-------------------------------------------------------------------------
+4. CO OZNACZA MIGANIE DIODY (LED D4)
+-------------------------------------------------------------------------
+- 6 mrugnięć na starcie: Jestem ZAMKNIĘTY.
+- 3 mrugnięcia na starcie: Jestem OTWARTY.
+- Świeci ciągle 1s: Dostałem sygnał z D2, biorę się do pracy.
+- 2 szybkie błyski: Silnik rusza.
+- Mruganie 2 razy wolno: BŁĄD! Czujnik każe jechać tam, gdzie już jestem.
+
+UWAGA: Jak system wykryje 10 błędów pod rząd, sam się zrestartuje.
+
+Kamil Ból.
+=========================================================================

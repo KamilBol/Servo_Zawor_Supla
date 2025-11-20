@@ -1,22 +1,35 @@
-ZAWÓR CZTERODROŻNY C.O. – SCHEMAT PODŁĄCZEŃ
-Autor: Kamil Ból
+PROJEKT: SERVO MASTER (WEMOS D1 MINI)
+AUTOR:   Kamil Ból
 
-WEMOS D1 MINI → ESP-01S
-D5 (GPIO14) ─────► GPIO0 (ESP-01S)        // impuls sterujący
-GND ─────────────► GND
-3.3V ─────────────► VCC
+LEGENDA:
+[HI] = Stan Wysoki 3.3V
+[LO] = Masa / GND
 
-ESP-01S → SERWO DS3225
-GPIO2 ───────────► sygnał PWM serwa
-GND serwa ───────► wspólna masa
-+6V serwa ───────► osobny zasilacz 6V/3A
+      +--------------------------+
+      |      WEMOS D1 MINI       |
+      |                          |
+      | 5V  ---------------------+-----> ZASILANIE SERWA (+)
+      | G   ------------------+--+-----> ZASILANIE SERWA (-) ORAZ MASA SUPLI !!!
+      |                          |
+      | D1 (GPIO5)  -------------+-----> SYGNAŁ SERWA (PWM)
+      |                          |
+      |                          |       [MODUŁ SUPLA - STEROWNIK]
+      | D2 (GPIO4)  <------------+-----  WYJŚCIE STERUJĄCE (IMPULS 3.3V)
+      |                          |
+      |                          |       [KONTAKTRON NA ZAWORZE]
+      | D5 (GPIO14) <------------+-----  MAGNES JEST = 3.3V (HI)
+      |                          |       MAGNES BRAK = POWIETRZE (LO)
+      |                          |
+      +--------------------------+
 
-KONTAKTRONY → WEMOS D1 MINI
-Kontaktron ZAMKNIĘTY → D1 (GPIO5) + pull-up 10k
-Kontaktron OTWARTY   → D2 (GPIO4) + pull-up 10k
-Drugi koniec kontaktronów → GND
+OPCJONALNE PRZYCISKI SERWISOWE (Kalibracja bez komputera):
+      
+      |                          |
+      | D6 (GPIO12) <------------+-----  PRZYCISK [-] DO 3.3V
+      | D7 (GPIO13) <------------+-----  PRZYCISK [+] DO 3.3V
+      | D0 (GPIO16) <------------+-----  PRZYCISK [LOGIKA] DO 3.3V
+      +--------------------------+
 
-WYJŚCIE STANU
-GPIO1 (TX) → podłączasz gdzie chcesz:
-  HIGH = zawór zamknięty (grzejniki)
-  LOW  = zawór otwarty (bojler)
+UWAGA KRYTYCZNA:
+Masa (G) Wemosa, Serwa i drugiego sterownika Supla MUSI BYĆ POŁĄCZONA!
+Inaczej układ nie wykryje impulsu na D2.

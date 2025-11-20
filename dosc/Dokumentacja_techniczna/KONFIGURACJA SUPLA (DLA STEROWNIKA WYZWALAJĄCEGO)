@@ -1,0 +1,19 @@
+KONFIGURACJA SUPLA (DLA STEROWNIKA WYZWALAJĄCEGO)
+
+Aby sterować tym zaworem z poziomu Supli, potrzebujesz drugiego urządzenia 
+(np. Sonoff, Wemos, Arduino), które poda impuls na pin D2 naszego sterownika.
+
+USTAWIENIA KANAŁU W SUPLA CLOUD:
+
+1. Funkcja: AUTOMAT SCHODOWY lub OTWIERANIE BRAMY
+2. Czas impulsu: 500ms - 1000ms (0.5 - 1 sekunda).
+   Nasz sterownik wyłapuje sygnał bardzo szybko, ale 1s jest najpewniejsza.
+
+LOGIKA DZIAŁANIA W APLIKACJI:
+- Klikasz "Otwórz" -> Sterownik podaje 3.3V na D2 -> Zawór zmienia stan.
+- Stan otwarcia/zamknięcia w aplikacji powinieneś brać z czujnika (kontaktronu)
+  podłączonego do tego drugiego Wemosa (lub użyć wirtualnego przekaźnika).
+
+WAŻNE:
+Pin D2 w naszym sterowniku serwa ma zaimplementowany filtr "Ghost Buster".
+Nie reaguje na zakłócenia. Wymaga twardego napięcia 3.3V (HI).

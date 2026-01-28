@@ -1,210 +1,206 @@
-SERVO MASTER: DOKUMENTACJA TECHNICZNA I HISTORIA PROJEKTU (V3.0 PLATINUM)
-Autor: Kamil Ból ("Bólu") Data ukończenia: Listopad 2025 Status: STABILNY (Production Ready)
+=========================================================================
+SERVO MASTER: DOKUMENTACJA TECHNICZNA I HISTORIA PROJEKTU (V3.1 PLATINUM)
+Autor: Kamil Ból ("Bólu")
+Data aktualizacji: Styczeń 2026
+Status: STABILNY (Production Ready + Supla Certified)
+=========================================================================
 
 📖 SPIS TREŚCI
-WSTĘP I ZAŁOŻENIA PROJEKTOWE
+1. WSTĘP I ZAŁOŻENIA PROJEKTOWE
+2. EWOLUCJA SPRZĘTOWA (HARDWARE)
+3. ANALIZA KODU ŹRÓDŁOWEGO (LINIJKA PO LINIJCE)
+4. ROZWIĄZANIE PROBLEMÓW (TROUBLESHOOTING)
+5. INTEGRACJA Z SUPLĄ I KONFIGURACJA KRAŃCÓWEK (NOWOŚĆ V3.1)
+6. INSTRUKCJA OBSŁUGI DLA UŻYTKOWNIKA KOŃCOWEGO
+7. PODSUMOWANIE
 
+=========================================================================
+1. WSTĘP I ZAŁOŻENIA PROJEKTOWE
+=========================================================================
 1.1 Cel projektu
+Zautomatyzowanie zaworu kulowego w instalacji C.O. (Centralnego Ogrzewania). 
+System jest elementem wykonawczym dla automatyki domowej (Supla), ale 
+zaprojektowałem go tak, aby działał w pełni autonomicznie.
 
 1.2 Wymagania krytyczne
+- Niezawodność: Zawór nie może się sam otworzyć/zamknąć przez zakłócenia.
+- Weryfikacja: Stan zaworu musi być potwierdzony fizycznymi czujnikami 
+  (dwie krańcówki), a nie "na wiarę".
+- Płynność: Ruch ma być powolny (ok. 5 sekund), aby nie powodować uderzeń 
+  hydraulicznych w rurach.
+- Failsafe: Po zaniku prądu sterownik musi wiedzieć, w jakiej jest pozycji, 
+  i nie wykonywać gwałtownych ruchów przy starcie.
 
-EWOLUCJA SPRZĘTOWA (HARDWARE)
-
+=========================================================================
+2. EWOLUCJA SPRZĘTOWA (HARDWARE)
+=========================================================================
 2.1 Dlaczego ESP-01S poległ? (Analiza problemu)
+Na początku użyłem ESP-01S.
+- Problem: Ten moduł ma wyprowadzone tylko piny GPIO0 i GPIO2.
+- Konflikt: Te piny sterują trybem uruchamiania (BOOT MODE). Jeśli podłączymy 
+  tam serwo lub przycisk, który zewrze je do masy przy starcie, ESP wejdzie 
+  w tryb programowania (FLASH) zamiast uruchomić kod.
+- Efekt: Ciągłe restarty i niestabilność.
 
 2.2 Wemos D1 Mini: Zwycięzca (Analiza Pinoutu)
-
-2.3 Dobór Serwa: SG90 vs Standard
-
-ANALIZA KODU ŹRÓDŁOWEGO (LINIJKA PO LINIJCE)
-
-3.1 Biblioteki i Definicje
-
-3.2 Zmienne Globalne i Pamięć
-
-3.3 "GHOST BUSTER" - Serce Stabilności (Szczegółowy Opis)
-
-3.4 Funkcje Serwisowe i Kalibracja
-
-3.5 Główna Maszyna Stanów (loop)
-
-ROZWIĄZANIE PROBLEMÓW (TROUBLESHOOTING - HISTORIA WALK)
-
-4.1 Problem "Wiszących Pinów" (Brak rezystorów)
-
-4.2 Problem "Skaczącego Serwa" (Amnezja po restarcie)
-
-4.3 Problem "Pętli Zwrotnej" (Szybki skok i powolny powrót)
-
-4.4 Problem Blokowania Wemosa (Zły pin TX)
-
-INSTRUKCJA OBSŁUGI DLA UŻYTKOWNIKA KOŃCOWEGO
-
-5.1 Podłączenie (Wiring)
-
-5.2 Sygnalizacja LED (Co ona do mnie gada?)
-
-5.3 Tryb Serwisowy (Bez komputera)
-
-PODSUMOWANIE I WNIOSKI NA PRZYSZŁOŚĆ
-
-1. WSTĘP I ZAŁOŻENIA PROJEKTOWE
-1.1 Cel projektu
-Zautomatyzowanie zaworu kulowego w instalacji C.O. (Centralnego Ogrzewania). System ma być elementem wykonawczym dla automatyki domowej (Supla), ale działać autonomicznie.
-
-1.2 Wymagania krytyczne
-Niezawodność: Zawór nie może się sam otworzyć/zamknąć przez zakłócenia.
-
-Weryfikacja: Stan zaworu musi być potwierdzony fizycznym czujnikiem (kontaktronem), a nie "na wiarę".
-
-Płynność: Ruch ma być powolny (ok. 5 sekund), aby nie powodować uderzeń hydraulicznych w rurach.
-
-Failsafe: Po zaniku prądu sterownik musi wiedzieć, w jakiej jest pozycji, i nie wykonywać gwałtownych ruchów ("szarpania") przy starcie.
-
-2. EWOLUCJA SPRZĘTOWA (HARDWARE)
-2.1 Dlaczego ESP-01S poległ?
-Na początku użyłem ESP-01S.
-
-Problem: Ten moduł ma wyprowadzone tylko piny GPIO0 i GPIO2.
-
-Konflikt: Te piny sterują trybem uruchamiania (BOOT MODE). Jeśli podłączymy tam serwo lub przycisk, który zewrze je do masy przy starcie, ESP wejdzie w tryb programowania (FLASH) zamiast uruchomić kod.
-
-Efekt: Ciągłe restarty i niestabilność.
-
-2.2 Wemos D1 Mini: Zwycięzca
 Wemos D1 Mini rozwiązał wszystkie problemy z zasilaniem i pinami.
 
-D1 (GPIO 5): Idealny do PWM (Serwo). Nie wpływa na bootowanie.
+- D1 (GPIO 5): Idealny do PWM (Serwo). Nie wpływa na bootowanie.
+- D2 (GPIO 4): Czyste wejście cyfrowe (TRIGGER - wyzwalanie).
+- D5 (GPIO 14): Wejście cyfrowe (Krańcówka OTWARTA).
+- D6 (GPIO 12): Wejście cyfrowe (Krańcówka ZAMKNIĘTA).
+- D0 (GPIO 16): Specyficzny pin z wbudowanym rezystorem pull-down. 
+  Idealny na przycisk serwisowy.
 
-D2 (GPIO 4): Czyste wejście cyfrowe.
+2.3 Dobór Serwa: Od zabawki do Potwora
+Testy robiłem na małym serwie SG90, żeby sprawdzić kod. Działało, ale to 
+tylko zabawka. Do finalnej wersji musiałem użyć czegoś konkretnego, co 
+faktycznie przekręci zawór.
 
-D5 (GPIO 14): Czyste wejście cyfrowe.
+WYBÓR OSTATECZNY: DS3225 (25kg)
+- Moc: 25kg/cm - to jest siła, która bez problemu radzi sobie z zaworem.
+- Napięcie: 4.8V - 6.0V.
+- Metalowe tryby: Niezbędne przy takich obciążeniach.
+- Kod został dopasowany pod to serwo (zakresy PWM), bo SG90 miał inne czasy.
 
-D0 (GPIO 16): Specyficzny pin z wbudowanym rezystorem pull-down (ściągającym do masy). Idealny na przycisk serwisowy, bo jest stabilny.
-
-2.3 Dobór Serwa: SG90
-Małe, tanie, ale kapryśne.
-
-Wymaga precyzji: Standardowa biblioteka Arduino Servo.h używa domyślnych czasów impulsów, które dla SG90 są zbyt szerokie, powodując "buczenie" i blokowanie na skrajnych pozycjach.
-
-Rozwiązanie: Musieliśmy ręcznie zdefiniować zakres mikrosekund (600us - 2400us).
-
+=========================================================================
 3. ANALIZA KODU ŹRÓDŁOWEGO
-Poniżej rozbieram nasz finalny kod na czynniki pierwsze.
+=========================================================================
+Poniżej rozbieram mój finalny kod na czynniki pierwsze.
 
 3.1 Biblioteki i Pamięć
-C++
-
 #include <EEPROM.h> 
-To kluczowa biblioteka. Pozwala zapisywać dane w pamięci flash mikrokontrolera, które przetrwają wyłączenie prądu. Bez tego sterownik miałby amnezję po każdym restarcie.
+To kluczowa biblioteka. Pozwala zapisywać dane w pamięci flash, które 
+przetrwają wyłączenie prądu. Bez tego sterownik miałby amnezję.
 
 3.2 Zmienne Globalne
-C++
-
 int US_ZAMKNIETY = 600;   
 int US_OTWARTY   = 2400;
-Dlaczego zmienne int, a nie stałe const? Bo w trybie serwisowym (przyciski D6/D7) my te wartości zmieniamy w locie. Gdyby były const, nie dałoby się ich edytować.
+Dlaczego int, a nie const? Bo w trybie serwisowym ja te wartości zmieniam 
+w locie (kalibracja).
 
-3.3 "GHOST BUSTER" - Serce Stabilności
-To jest najważniejsza funkcja w całym kodzie. Zastępuje fizyczny rezystor.
-
-C++
+3.3 "GHOST BUSTER" - Serce Stabilności (Dla pinu D2)
+To moja autorska funkcja zastępująca fizyczny rezystor na pinie wyzwalającym.
 
 bool sprawdzPin(int pin) {
-  if (digitalRead(pin) == LOW) return false; // 1. Czytamy stan. Jak 0 to 0.
+  if (digitalRead(pin) == LOW) return false; // Czytamy stan.
   
-  // 2. Jeśli jest 1 (HIGH), robimy "Test Obciążenia".
+  // Test Obciążenia:
   pinMode(pin, OUTPUT); 
   digitalWrite(pin, LOW); // Zwieramy pin do masy (wymuszamy 0V).
-  delayMicroseconds(10);  // Czekamy 10 mikrosekund.
+  delayMicroseconds(10);  
   pinMode(pin, INPUT);    // Wracamy do nasłuchu.
   
-  // 3. Sprawdzamy wynik walki.
+  // Sprawdzamy wynik:
   if (digitalRead(pin) == HIGH) return true; // Kabel wygrał (Prawdziwy Sygnał)
-  return false; // Masa wygrała (To był tylko szum/zakłócenie)
+  return false; // Masa wygrała (To był szum)
 }
-Dlaczego to działa? Szum elektromagnetyczny ma bardzo małą energię. Zwarcie do masy natychmiast go "zabija". Zasilacz 3.3V podłączony kablem ma dużą wydajność prądową i natychmiast "podnosi" napięcie z powrotem.
 
 3.4 Funkcja Ruchu (wykonajRuch)
-Tutaj dzieje się magia sterowania serwem.
-
-Anty-Szok Startowy:
-
-C++
-
-myServo.writeMicroseconds(startUS); 
-myServo.attach(PIN_SERVO);
-delay(200);
-Najpierw ustawiamy "mózg" serwa na pozycję, w której ono AKTUALNIE JEST (z pamięci), a dopiero potem podłączamy zasilanie sygnałowe (attach). Dzięki temu serwo nie szarpie przy starcie.
-
-Pętla Spowalniająca (Slow Motion): Zamiast kazać serwu "Jedź na 2400!", dzielimy trasę na małe kroczki i wykonujemy je w pętli for. To daje nam ten piękny, 5-sekundowy ruch.
-
-Cisza po Pracy:
-
-C++
-
-myServo.detach();
-Po dojechaniu na miejsce odłączamy sygnał od serwa. Serwo przestaje "trzymać na siłę", przestaje buczeć i nie pobiera prądu. Trzyma je tylko przekładnia (samohamowność).
+- Anty-Szok Startowy: Najpierw ustawiam "mózg" serwa na pozycję z pamięci, 
+  a dopiero potem podłączam zasilanie (attach).
+- Slow Motion: Pętla for dzieli trasę na małe kroczki.
+- Cisza po pracy: myServo.detach() - odłączam sygnał, żeby serwo nie buczało.
 
 3.5 Pamięć EEPROM
-C++
-
 EEPROM.put(ADRES_MEM, wartosc);
 EEPROM.commit();
-Po każdym udanym ruchu zapisujemy nową pozycję. Dzięki temu po restarcie prądu w setup() możemy ją odczytać i wiedzieć, gdzie jesteśmy.
+Po każdym ruchu zapisuję pozycję.
 
+=========================================================================
 4. ROZWIĄZANIE PROBLEMÓW (TROUBLESHOOTING)
-4.1 Problem: "Wiszące Piny"
-Objaw: Sterownik sam się włączał, diody mrugały bez powodu. Przyczyna: Brak rezystorów pull-down przy przyciskach. Rozwiązanie: Funkcja sprawdzPin (Ghost Buster) opisana w rozdziale 3.3.
+=========================================================================
+4.1 Problem "Wiszących Pinów"
+Objaw: Sterownik sam się włączał.
+Przyczyna: Zakłócenia na pinie sterującym.
+Rozwiązanie: "Ghost Buster" programowy na D2 oraz fizyczne rezystory na D5/D6.
 
-4.2 Problem: "Skaczące Serwo"
-Objaw: Po włączeniu prądu serwo robiło szybki ruch "bam!" w losową stronę. Przyczyna: Biblioteka Servo domyślnie ustawia pozycję 90 stopni przy starcie. Jeśli zawór był na 0, to serwo dostawało strzał na 90. Rozwiązanie: Pamięć EEPROM. Wczytujemy ostatnią pozycję przed attach().
+4.2 Problem "Skaczącego Serwa"
+Objaw: Po włączeniu prądu serwo strzelało w losową stronę.
+Rozwiązanie: Wczytywanie pozycji z EEPROM przed wykonaniem servo.attach().
 
-4.3 Problem: "Pętla Zwrotna"
-Objaw: Serwo jechało na 100%, a potem powoli wracało. Przyczyna: Błąd logiczny. Program zakładał: "Skoro każą mi zamknąć, to na pewno jestem otwarty". A jeśli czujnik kłamał, to program kazał serwu jechać tam, gdzie już było (ale "na około"). Rozwiązanie: Bezwzględne sprawdzanie pozycji startowej z pamięci. start = aktualnaPozycja. Jeśli start == cel, blokujemy ruch.
+4.3 Problem "Pętli Zwrotnej"
+Objaw: Serwo jechało, mimo że już było na miejscu.
+Rozwiązanie: Jeśli start == cel, blokuję ruch programowo.
 
-4.4 Problem: "Zwiecha Wemosa"
-Objaw: Po naciśnięciu przycisku zmiany logiki, Wemos przestawał działać, brak logów w PC. Przyczyna: Używaliśmy pinu TX (GPIO 1) jako przycisku. Pin ten służy do wysyłania danych do komputera. Zwarcie go do masy blokuje procesor. Rozwiązanie: Przeniesienie funkcji na pin D0 (GPIO 16).
+4.4 Problem Blokowania Wemosa
+Objaw: Po naciśnięciu przycisku Wemos umierał.
+Przyczyna: Użycie pinu TX (GPIO 1) jako przycisku.
+Rozwiązanie: Przeniesienie funkcji na pin D0.
 
-5. INSTRUKCJA OBSŁUGI (USER MANUAL)
-5.1 Podłączenie (Wiring)
-D1: Żółty kabel serwa.
+=========================================================================
+5. INTEGRACJA Z SUPLĄ I KONFIGURACJA KRAŃCÓWEK (NOWOŚĆ V3.1)
+=========================================================================
+To jest krytyczna sekcja, którą opracowałem, aby status w aplikacji działał 
+poprawnie.
 
-D2: Sygnał z Supli (plus).
+5.1 KONFIGURACJA SUPLA (STEROWNIK WYZWALAJĄCY)
+Aby sterować zaworem, potrzebujesz drugiego urządzenia (np. Sonoff), które 
+poda impuls na pin [D2] mojego sterownika.
 
-D5: Kontaktron (plus).
+Ustawienia w Cloud:
+- Funkcja: AUTOMAT SCHODOWY lub OTWIERANIE BRAMY.
+- Czas impulsu: 0.5 - 1 sekunda.
+- Działanie: Klikasz "Otwórz" -> Sterownik podaje 3.3V na D2 -> Ruch.
 
-GND: Wszystkie masy połączone razem!
+5.2 PODŁĄCZENIE KRAŃCÓWEK (ZASADA DZIAŁANIA)
+W tym projekcie kontaktrony podają PLUS (3.3V), a nie masę.
+- Zawór ZAMKNIĘTY (0 stopni) -> 3.3V na pin [D6].
+- Zawór OTWARTY (70 stopni) -> 3.3V na pin [D5].
 
-5.2 Sygnalizacja LED
-6 szybkich mrugnięć: "Wstałem. Melduję, że zawór jest ZAMKNIĘTY".
+5.3 WYMAGANA MODYFIKACJA SPRZĘTOWA (PULL-DOWN)
+Wemos D1 Mini nie ma rezystorów ściągających do masy (oprócz D0).
+Musiałem je dodać, aby piny D5 i D6 nie "wisiały" po rozwarciu kontaktronu.
 
-3 szybkie mrugnięcia: "Wstałem. Melduję, że zawór jest OTWARTY".
+Instrukcja lutowania:
+1. Weź dwa rezystory: 4.7kΩ lub 10kΩ.
+2. Jeden wlutuj między pin D5 a GND.
+3. Drugi wlutuj między pin D6 a GND.
+Bez tego ikonka w Supli nigdy nie zgaśnie!
 
-Długie świecenie (1s): "Odebrałem rozkaz, biorę się do roboty".
+5.4 USTAWIENIA W GUI GENERIC (SOFTWARE)
+W konfiguracji pinów (Sensorów):
+-> ODZNACZ (WYŁĄCZ) "Internal Pull-up".
 
-2 mrugnięcia: "Ruszam silnikiem".
+Dlaczego? Internal Pull-up jest do sterowania masą. Ja steruję plusem 
+z własnymi rezystorami. Ta opcja musi być wyłączona.
 
-Mruganie powolne (2x): "BŁĄD! Dostałem rozkaz, ale czujnik mówi, że już to zrobiłem. Nie ruszam się dla bezpieczeństwa".
+=========================================================================
+6. INSTRUKCJA OBSŁUGI DLA UŻYTKOWNIKA KOŃCOWEGO
+=========================================================================
+6.1 Podłączenie (Wiring)
+[D1] -> Żółty kabel serwa DS3225 (PWM).
+[D2] -> Sygnał z Supli/Sterownika (Impuls 3.3V).
+[D5] -> Kontaktron OTWARTY (Sygnał 3.3V).
+[D6] -> Kontaktron ZAMKNIĘTY (Sygnał 3.3V).
+[GND]-> Wspólna masa dla wszystkiego!
 
-5.3 Tryb Serwisowy
-Zawór nie domyka? Dotknij D6 kablem 3.3V. Kąt zmniejszy się o kawałek.
+6.2 Sygnalizacja LED (Co ona do mnie gada?)
+- 6 mrugnięć: Wstałem, jestem ZAMKNIĘTY.
+- 3 mrugnięcia: Wstałem, jestem OTWARTY.
+- Świeci 1s: Dostałem rozkaz z D2, pracuję.
+- 2 szybkie błyski: Silnik rusza.
+- 2 wolne mrugnięcia: BŁĄD LOGICZNY (Każą mi jechać tam, gdzie jestem).
 
-Zawór nie otwiera się do końca? Dotknij D7. Kąt się zwiększy.
+6.3 Tryb Serwisowy (Bez komputera)
+- Zawór nie domyka? Dotknij D6 kablem 3.3V (Tryb korekty).
+- Zawór nie otwiera do końca? Dotknij D7 kablem 3.3V.
+- Odwrócona logika? Zwieraj D0 do 3.3V przez 5 sekund.
 
-Odwrotny czujnik? Dotknij D0 i trzymaj 5 sekund. Sterownik odwróci logikę (Otwarty <-> Zamknięty).
-
-6. PODSUMOWANIE I WNIOSKI
-Stworzyliśmy system klasy przemysłowej na amatorskim sprzęcie. Kluczem do sukcesu nie był drogi sprzęt, ale inteligentne oprogramowanie, które radzi sobie z ułomnościami fizycznymi (brak rezystorów, tanie serwo).
+=========================================================================
+7. PODSUMOWANIE I WNIOSKI NA PRZYSZŁOŚĆ
+=========================================================================
+Stworzyłem ten system samodzielnie, bez niczyjej pomocy. To rozwiązanie 
+klasy przemysłowej na amatorskim sprzęcie. Kluczem do sukcesu nie był drogi 
+sprzęt, ale moje oprogramowanie ("Ghost Buster") i poprawne zrozumienie 
+fizyki (Rezystory Pull-Down).
 
 Co zapamiętać na przyszłość?
+1. Zawsze używać pamięci EEPROM dla stanów krytycznych.
+2. Unikać pinów TX/RX do sterowania.
+3. Jeśli steruję plusem (3.3V), muszę dać rezystor do masy (Pull-Down) 
+   i wyłączyć Pull-up w sofcie.
+4. Dobra diagnostyka (LED) oszczędza 90% czasu.
 
-Zawsze używaj pamięci nieulotnej (EEPROM) w sterownikach, które mają stany (otwarty/zamknięty).
-
-Unikaj pinu TX/RX do sterowania.
-
-Jeśli nie masz rezystorów, musisz napisać kod, który je "symuluje" (sprawdzPin).
-
-Dobra diagnostyka (LED i Logi) oszczędza 90% czasu przy uruchamianiu.
-
-Koniec Dokumentacji.
+Kamil Ból.
+=========================================================================

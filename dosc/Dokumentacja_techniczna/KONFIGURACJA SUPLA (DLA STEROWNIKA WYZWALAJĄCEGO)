@@ -1,19 +1,40 @@
-KONFIGURACJA SUPLA (DLA STEROWNIKA WYZWALAJĄCEGO)
+### KONFIGURACJA SUPLA (DLA STEROWNIKA WYZWALAJĄCEGO)
 
-Aby sterować tym zaworem z poziomu Supli, potrzebujesz drugiego urządzenia 
-(np. Sonoff, Wemos, Arduino), które poda impuls na pin D2 naszego sterownika.
+Aby sterować tym zaworem z poziomu Supli, potrzebujesz drugiego urządzenia (np. Sonoff, Wemos, Arduino), które poda impuls na pin D2 naszego sterownika.
 
-USTAWIENIA KANAŁU W SUPLA CLOUD:
+**USTAWIENIA KANAŁU W SUPLA CLOUD:**
 
-1. Funkcja: AUTOMAT SCHODOWY lub OTWIERANIE BRAMY
-2. Czas impulsu: 500ms - 1000ms (0.5 - 1 sekunda).
-   Nasz sterownik wyłapuje sygnał bardzo szybko, ale 1s jest najpewniejsza.
+1. **Funkcja:** AUTOMAT SCHODOWY lub OTWIERANIE BRAMY
+2. **Czas impulsu:** 500ms - 1000ms (0.5 - 1 sekunda).
+Nasz sterownik wyłapuje sygnał bardzo szybko, ale 1s jest najpewniejsza.
 
-LOGIKA DZIAŁANIA W APLIKACJI:
-- Klikasz "Otwórz" -> Sterownik podaje 3.3V na D2 -> Zawór zmienia stan.
-- Stan otwarcia/zamknięcia w aplikacji powinieneś brać z czujnika (kontaktronu)
-  podłączonego do tego drugiego Wemosa (lub użyć wirtualnego przekaźnika).
+**LOGIKA DZIAŁANIA W APLIKACJI:**
 
-WAŻNE:
-Pin D2 w naszym sterowniku serwa ma zaimplementowany filtr "Ghost Buster".
-Nie reaguje na zakłócenia. Wymaga twardego napięcia 3.3V (HI).
+* Klikasz "Otwórz" -> Sterownik podaje 3.3V na D2 -> Zawór zmienia stan.
+
+**WAŻNE:**
+Pin D2 w naszym sterowniku serwa ma zaimplementowany filtr "Ghost Buster". Nie reaguje na zakłócenia. Wymaga twardego napięcia 3.3V (HI).
+
+---
+
+### PODŁĄCZENIE I KONFIGURACJA KRAŃCÓWEK (STATUS ZAWORU)
+
+W tym projekcie kontaktrony podają napięcie **3.3V** na piny wejściowe Wemosa w zależności od kąta wychylenia serwa:
+
+* **Zawór ZAMKNIĘTY (0 stopni):** Kontaktron podaje 3.3V na pin **D6**.
+* **Zawór OTWARTY (70 stopni):** Kontaktron podaje 3.3V na pin **D5**.
+
+Ponieważ sterowanie odbywa się "plusem" (3.3V), a nie masą, **konieczne jest zastosowanie zewnętrznych rezystorów ściągających (Pull-Down) oraz zmiana ustawień w GUI Generic.**
+
+**1. WYMAGANA MODYFIKACJA SPRZĘTOWA (PULL-DOWN):**
+Aby piny nie "wisiały w powietrzu" po rozłączeniu kontaktronu (co powoduje błędy odczytu), należy wlutować rezystory (o wartości **4.7kΩ** lub **10kΩ**) pomiędzy pin sygnałowy a masę (GND):
+
+* Jeden rezystor wpinamy między **D5 a GND**.
+* Drugi rezystor wpinamy między **D6 a GND**.
+* Dzięki temu, gdy zawór ruszy i zabierze napięcie 3.3V, rezystor natychmiast wyzeruje stan na pinie (wygasi ikonę w aplikacji).
+
+**2. USTAWIENIA W GUI GENERIC (BARDZO WAŻNE):**
+W konfiguracji pinów dla krańcówek (Sensorów):
+
+* Należy **ODZNACZYĆ (wyłączyć)** opcję **"Internal Pull-up"** (Wewnętrzny pull-up).
+* Wewnętrzny pull-up służy tylko do sterowania masą. Przy sterowaniu napięciem 3.3V i zastosowaniu zewnętrznych rezystorów do masy, opcja ta musi być nieaktywna.

@@ -1,54 +1,89 @@
 =========================================================================
 INSTRUKCJA SERWISOWA I KONFIGURACYJNA - STEROWNIK ZAWORU "SERVO MASTER"
 Autor: Kamil Ból ("Bólu")
-Wersja: 3.0 (Platinum Edition)
+Wersja: 3.1 (Platinum Edition + Supla Update)
 =========================================================================
 
 SIEMA. Tu Bólu.
 To jest instrukcja jak sterować ukrytymi funkcjami serwisowymi bez podłączania 
-komputera. Wszystko ustawisz zworkami/kabelkami na płytce.
+komputera oraz jak to poprawnie spiąć z Suplą, żeby nie było cyrków.
 
 -------------------------------------------------------------------------
 1. PINOUT (CO GDZIE WTYKASZ)
 -------------------------------------------------------------------------
 [D1] -> SERWO (Sygnał PWM)
 [D2] -> TRIGGER (Sterowanie). Impuls 3.3V = Ruch.
-[D5] -> KONTAKTRON. 3.3V = Zamknięty (chyba że odwrócisz logikę).
 
-[D6] -> ZMNIEJSZ KĄT OTWARCIA (Korekta -)
-[D7] -> ZWIĘKSZ KĄT OTWARCIA (Korekta +)
-[D0] -> ODWRACANIE LOGIKI (Zmiana działania czujnika)
+[D5] -> KONTAKTRON "OTWARTY" (70 stopni). Daje 3.3V jak otwarte.
+[D6] -> KONTAKTRON "ZAMKNIĘTY" (0 stopni). Daje 3.3V jak zamknięte.
+[D0] -> ODWRACANIE LOGIKI / SERWIS.
 
 -------------------------------------------------------------------------
-2. KALIBRACJA KĄTA (JAK ZAWÓR NIE DOMYKA)
+2. KONFIGURACJA SUPLA (DLA STEROWNIKA WYZWALAJĄCEGO)
+-------------------------------------------------------------------------
+Żeby sterować tym zaworem z apki, musisz mieć drugi sterownik (np. Wemos, 
+Sonoff), który poda impuls napięcia na nasz pin [D2].
+
+USTAWIENIA KANAŁU W SUPLA CLOUD:
+1. Funkcja: AUTOMAT SCHODOWY lub OTWIERANIE BRAMY.
+2. Czas impulsu: 500ms - 1000ms (0.5 - 1 sekunda).
+   Nasz sterownik łapie szybko, ale 1s jest najpewniejsza.
+
+JAK TO DZIAŁA:
+- Klikasz w telefonie "Otwórz".
+- Sterownik podaje twarde 3.3V na pin [D2].
+- Zawór zmienia stan na przeciwny.
+
+WAŻNE: Pin [D2] ma filtr "Ghost Buster". Olewa zakłócenia. Musi dostać 
+konkretny strzał 3.3V, żeby ruszyć.
+
+-------------------------------------------------------------------------
+3. PODŁĄCZENIE KRAŃCÓWEK (TO JEST KLUCZOWE - CZYTAJ!)
+-------------------------------------------------------------------------
+Tutaj robimy inaczej niż zwykle. Kontaktrony podają PLUS (3.3V) na piny, 
+a nie masę.
+
+LOGIKA:
+- Zawór ZAMKNIĘTY (0 stopni) -> Kontaktron podaje 3.3V na pin [D6].
+- Zawór OTWARTY (70 stopni) -> Kontaktron podaje 3.3V na pin [D5].
+- Stan pośredni -> Oba piny mają 0V.
+
+
+
+ABY TO DZIAŁAŁO, MUSISZ ZROBIĆ DWIE RZECZY:
+
+A) HARDWARE (LUTOWNICA W DŁOŃ):
+Wemos D1 Mini nie ma rezystorów ściągających do masy (Pull-Down).
+Musisz je dołożyć, żeby pin "nie wisiał" w powietrzu jak puści kontaktron.
+
+1. Weź dwa rezystory: 4.7kΩ lub 10kΩ.
+2. Pierwszy rezystor wlutuj między pin D5 a GND.
+3. Drugi rezystor wlutuj między pin D6 a GND.
+Bez tego ikonka w Supli nie zgaśnie po otwarciu zaworu!
+
+B) SOFTWARE (GUI GENERIC / SUPLA):
+W ustawieniach krańcówek (Sensorów) musisz ODPTASZKOWAĆ opcję:
+-> [ ] Internal Pull-up (MA BYĆ WYŁĄCZONE!)
+
+Dlaczego? Bo "Internal Pull-up" jest do sterowania masą. My sterujemy 
+plusem i mamy własne rezystory na płytce. Jak tego nie wyłączysz, 
+będzie pokazywać głupoty.
+
+-------------------------------------------------------------------------
+4. KALIBRACJA KĄTA (SERWIS)
 -------------------------------------------------------------------------
 -> ABY ZMNIEJSZYĆ KĄT:
-   Dotknij kablem 3.3V do pinu [D6]. 
+   Dotknij kablem 3.3V do pinu [D6] (tylko w trybie serwisowym). 
    LED mrugnie 1 raz. Kąt zmniejsza się o ok. 5 stopni.
 
 -> ABY ZWIĘKSZYĆ KĄT:
    Dotknij kablem 3.3V do pinu [D7].
    LED mrugnie 2 razy. Kąt zwiększa się o ok. 5 stopni.
 
-Ustawienia są zapamiętywane na zawsze (w EEPROM).
+Ustawienia lecą do pamięci EEPROM na wieki.
 
 -------------------------------------------------------------------------
-3. ZMIANA LOGIKI CZUJNIKA (BEZ LUTOWANIA)
--------------------------------------------------------------------------
-Jeśli kontaktron działa na odwrót (pokazuje otwarte jak jest zamknięte):
-
--> CO ZROBIĆ:
-   Zewrzyj pin [D0] do 3.3V i TRZYMAJ przez 5 SEKUND.
-   
--> EFEKT:
-   Dioda LED zrobi dyskotekę (5 szybkich błysków).
-   
--> WYNIK:
-   Wemos odwraca interpretację pinu D5. 
-   (HI staje się LO, LO staje się HI).
-
--------------------------------------------------------------------------
-4. CO OZNACZA MIGANIE DIODY (LED D4)
+5. CO OZNACZA MIGANIE DIODY (LED D4)
 -------------------------------------------------------------------------
 - 6 mrugnięć na starcie: Jestem ZAMKNIĘTY.
 - 3 mrugnięcia na starcie: Jestem OTWARTY.

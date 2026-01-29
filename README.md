@@ -50,3 +50,5 @@ Szczegółowy schemat znajdziesz w folderze `/doc`.
 
 ### 📜 Licencja
 Róbta co chceta (MIT). Kod jest dla ludzi.
+https://github.com/KamilBol/Servo_Zawor_Supla/blob/main/3D/Zrzut%20ekranu%202026-01-29%20003321.png?raw=true
+

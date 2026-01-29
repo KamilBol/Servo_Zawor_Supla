@@ -7,7 +7,7 @@ Projekt sterownika do zaworu kulowego (lub innego elementu C.O.), opartego na se
 
 ### 🔥 Główne Funkcje (Bólu Soft v3.0):
 * **Sterowanie Mikrosekundami:** Pełna płynność i precyzja dla serw SG90/MG90.
-* **Ghost Buster:** Autorski algorytm odszumiania pinów (działa stabilnie bez zewnętrznych rezystorów!).
+* **Ghost Buster:** Algorytm odszumiania pinów (działa stabilnie bez zewnętrznych rezystorów!).
 * **Pamięć EEPROM:** Po zaniku prądu sterownik pamięta, gdzie skończył. Zero szarpania przy starcie.
 * **Safety Mode:** Jeśli czujnik (kontaktron) ulegnie awarii, system to wykryje i po 10 próbach zresetuje się, zamiast niszczyć zawór.
 * **Tryb Serwisowy:** Możliwość kalibracji kątów i odwracania logiki przyciskami - bez podłączania komputera!
